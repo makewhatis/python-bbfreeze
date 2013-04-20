@@ -1,21 +1,20 @@
-# %bcond_without	tests	# do not perform "make test"
+%if 0%{?fedora} > 12
+%global with_python3 1
+%else
+%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print (get_python_lib())")}
+%endif
 
-%define 	module	bbfreeze
 Summary:	Creates stand-alone executables from python scripts
-Name:		python-%{module}
-Version:	1.0.2
-Release:	1
+Name:		python-bbfreeze
+Version:	1.1.0
+Release:	1%{?relprefix}%{?prerel}%{?dist}
 License:	zlib/libpng
 Group:		Development/Languages/Python
 Source0:	http://pypi.python.org/packages/source/b/bbfreeze/bbfreeze-%{version}.zip
-# Source0-md5:	53e74d5ae352541732ef2987ad1f68a6
 URL:		http://pypi.python.org/pypi/bbfreeze
 BuildRequires:	python-devel
-BuildRequires:	rpm-pythonprov
-# if py_postclean is used
-BuildRequires:	rpmbuild(macros) >= 1.219
+BuildRequires:  python-setuptools
 BuildRequires:	unzip
-Requires:	python-modules
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -39,22 +38,17 @@ rm -rf $RPM_BUILD_ROOT
 	--optimize=2 \
 	--root=$RPM_BUILD_ROOT
 
-%py_ocomp $RPM_BUILD_ROOT%{py_sitedir}
-%py_comp $RPM_BUILD_ROOT%{py_sitedir}
-%py_postclean
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
+%{python_sitelib}/*
 %attr(755,root,root) %{_bindir}/bb-freeze
+%attr(755,root,root) %{_bindir}/bbfreeze
 
-%dir %{py_sitedir}/%{module}
-%{py_sitedir}/%{module}/*.py[co]
-%attr(755,root,root) %{py_sitedir}/%{module}/console.exe
-%dir %{py_sitedir}/%{module}/modulegraph
-%{py_sitedir}/%{module}/modulegraph/*.py[co]
-%if "%{py_ver}" > "2.4"
-%{py_sitedir}/%{module}*.egg-info
-%endif
+%changelog
+* Sat Apr 20 2013 David Johansen <david@makewhatis.com> - 1.1.0-1
+- Refactoring spec file
+
